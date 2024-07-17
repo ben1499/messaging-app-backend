@@ -3,6 +3,7 @@ const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
+require('dotenv').config();
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
@@ -13,6 +14,15 @@ const app = express();
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
+
+// mongoose setup
+mongoose.set("strictQuery", false);
+const mongoDb = process.env.MONGODB_URI;
+
+main().catch((err) => console.log(err))
+async function main() {
+  await mongoose.connect(mongoDb);
+}
 
 app.use(logger("dev"));
 app.use(express.json());
