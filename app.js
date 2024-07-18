@@ -4,7 +4,11 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const mongoose = require("mongoose");
-require('dotenv').config();
+const passport = require("passport");
+require("dotenv").config();
+
+// Pass the global passport object into the configuration function
+require("./config/passport")(passport);
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");

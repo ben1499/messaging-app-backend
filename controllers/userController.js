@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");
 const { body, validationResult } = require("express-validator");
+const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
 exports.user_create = [
@@ -51,6 +52,38 @@ exports.user_create = [
   })
 ]
 
-exports.login = asyncHandler(async (req, res, next) => {
-  res.send("Login");
-})
+exports.login = [
+  body("email")
+    .trim()
+    .isLength({ min: 1 })
+    .escape()
+    .withMessage("Username is required")
+    .isEmail()
+    .withMessage("Invalid Email"),
+    body("password")
+    .trim()
+    .isLength({ min: 1 })
+    .escape()
+    .withMessage("Password is required"),
+
+  asyncHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    } else {
+      const user = await User.findOne({ email: req.body.email }).exec();
+
+      if (!user) {
+        return res.status(400).json({ message: "Email not found" })
+      }
+      const match = await bcrypt.compare(req.body.password, user.password);
+      if (!match) {
+        return res.status(400).json({ message: "Password is incorrect" });
+      }
+      jwt.sign({ user_id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" }, (err, token) => {
+        res.status(200).json({ token: `Bearer ${token}`, user_id: user._id });
+      });
+    }
+  })
+]
