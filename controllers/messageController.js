@@ -1,4 +1,4 @@
-const { body, validationResult } = require("express-validator");
+const { body, query, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
 const passport = require("passport");
 
@@ -35,7 +35,7 @@ exports.message_create = [
         to_user_id: req.body.to_user_id
       })
 
-      if (message.user_id === message.to_user_id) {
+      if (message.user_id.toString() === message.to_user_id.toString()) {
         return res.status(200).json({ message: "Cannot send message to same user" });
       }
 
@@ -64,5 +64,51 @@ exports.message_delete = [
 
     await Message.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Message deleted successfully" });
+  })
+]
+
+exports.messages_get = [
+  passport.authenticate("jwt", { session: false }),
+
+  query("to_user_id")
+  .trim()
+  .isLength({ min: 1 })
+  .escape()
+  .withMessage("To user id query param is required"),
+
+  asyncHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
+    } else {
+      const sentMessages = await Message.find({ user_id: req.user.user_id, to_user_id: req.query.to_user_id }).lean().exec();
+      const receivedMessages = await Message.find({ user_id: req.query.to_user_id, to_user_id: req.user.user_id }).lean().exec();
+
+      sentMessages.forEach((message, index) => {
+        sentMessages[index].is_current_user = true;
+      })
+
+      receivedMessages.forEach((message, index) => {
+        receivedMessages[index].is_current_user = false;
+      })
+
+      let allMessages = sentMessages.concat(receivedMessages);
+
+      allMessages = allMessages.map((message) => {
+        const date = new Date(message.date);
+        delete message.__v;
+        return {
+          ...message,
+          date_formatted: `${date.toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric"})} ${date.toLocaleTimeString([], { hour: "numeric", minute: "numeric", hour12: true })}`
+        }
+      })
+
+      allMessages.sort((objA, objB) => {
+        return objA.date - objB.date;
+      });
+
+      res.status(200).json({ data: allMessages });
+    }
   })
 ]
