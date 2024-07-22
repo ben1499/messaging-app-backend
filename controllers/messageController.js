@@ -44,3 +44,25 @@ exports.message_create = [
     }
   })
 ]
+
+exports.message_delete = [
+  passport.authenticate("jwt", { session: false }),
+  asyncHandler(async (req, res, next) => {
+    if (!req.params.id) {
+      return res.status(400).json({ message: "Id params is required" })
+    }
+
+    const message = await Message.findById(req.params.id).exec();
+
+    if (!message) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    if (req.user.user_id !== message.user_id.toString()) {
+      return res.status(403).json({ message: "You are not authorized to delete this message" })
+    }
+
+    await Message.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Message deleted successfully" });
+  })
+]
