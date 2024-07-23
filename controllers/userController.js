@@ -184,3 +184,21 @@ exports.user_update = [
     }
   })
 ]
+
+exports.users_get = [
+  passport.authenticate("jwt", { session: false }),
+  asyncHandler(async (req, res, next) => {
+    const users = await User.find({ _id: { $ne: req.user.user_id }}, "-password").exec();
+
+    res.status(200).json({ data: users })
+  })
+]
+
+exports.user_get = [
+  passport.authenticate("jwt", { session: false }),
+  asyncHandler(async (req, res, next) => {
+    const user = await User.findById(req.user.user_id, "-password").exec();
+
+    res.status(200).json({ data: user });
+  })
+]
