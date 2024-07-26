@@ -92,11 +92,11 @@ exports.login = [
       const user = await User.findOne({ email: req.body.email }).exec();
 
       if (!user) {
-        return res.status(400).json({ message: "Email not found" })
+        return res.status(400).json({ errors: [{ path: "email", msg: "Email not found" }] })
       }
       const match = await bcrypt.compare(req.body.password, user.password);
       if (!match) {
-        return res.status(400).json({ message: "Password is incorrect" });
+        return res.status(400).json({ errors: [{ path: "password", msg: "Password is incorrect"}] });
       }
       jwt.sign({ user_id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" }, (err, token) => {
         res.status(200).json({ token: `Bearer ${token}`, user_id: user._id });
@@ -150,7 +150,6 @@ exports.user_update = [
       const existingUser = await User.findById(req.params.id).exec();
       
       const oldImageId = existingUser.image?.img_id;
-      console.log(oldImageId);
       if (oldImageId) 
         await removeFromCloudinary(oldImageId);
 
