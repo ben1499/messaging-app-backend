@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const mongoose = require("mongoose");
 const passport = require("passport");
+const cors = require("cors");
 require("dotenv").config();
 
 // Pass the global passport object into the configuration function
@@ -15,6 +16,8 @@ const usersRouter = require("./routes/users");
 const messagesRouter = require("./routes/messages");
 
 const app = express();
+
+app.use(cors());
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
