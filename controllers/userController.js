@@ -74,7 +74,7 @@ exports.login = [
     .trim()
     .isLength({ min: 1 })
     .escape()
-    .withMessage("Username is required")
+    .withMessage("Email is required")
     .isEmail()
     .withMessage("Invalid Email"),
     body("password")
