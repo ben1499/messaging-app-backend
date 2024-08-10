@@ -130,8 +130,7 @@ exports.user_update = [
     .isEmail()
     .withMessage("Email is invalid"),
   body("about")
-    .trim()
-    .escape(),
+    .trim(),
   body("image_url")
     .trim()
     .escape(),
@@ -165,13 +164,29 @@ exports.user_update = [
         _id: req.params.id
       })
     } else {
-      user = new User({
-        first_name: req.body.first_name,
-        last_name: req.body.last_name,
-        email: req.body.email,
-        about: req.body.about,
-        _id: req.params.id
-      })
+      const existingUser = await User.findById(req.params.id).exec();
+      const oldImageId = existingUser.image?.img_id;
+      if (oldImageId) 
+        await removeFromCloudinary(oldImageId);
+      
+      if (req.body.image === "null") {
+        user = new User({
+          first_name: req.body.first_name,
+          last_name: req.body.last_name,
+          email: req.body.email,
+          about: req.body.about,
+          image: null,
+          _id: req.params.id
+        })
+      } else {
+        user = new User({
+          first_name: req.body.first_name,
+          last_name: req.body.last_name,
+          email: req.body.email,
+          about: req.body.about,
+          _id: req.params.id
+        })
+      }
     }
 
     if (!errors.isEmpty()) {
