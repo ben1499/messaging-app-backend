@@ -9,7 +9,7 @@ exports.message_create = [
   body("content")
   .trim()
   .isLength({ min: 1 })
-  .escape()
+  // .escape()
   .withMessage("Message content is required"),
   // body("user_id")
   // .trim()
