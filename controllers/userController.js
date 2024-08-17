@@ -211,7 +211,6 @@ exports.users_get = [
 exports.user_get = [
   passport.authenticate("jwt", { session: false }),
   asyncHandler(async (req, res, next) => {
-    console.log(req.params.id);
     const user = await User.findById(req.params.id, "-password").lean().exec();
 
     let data = null;
