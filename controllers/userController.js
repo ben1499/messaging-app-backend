@@ -168,7 +168,7 @@ exports.user_update = [
       const oldImageId = existingUser.image?.img_id;
       if (oldImageId) 
         await removeFromCloudinary(oldImageId);
-      
+
       if (req.body.image === "null") {
         user = new User({
           first_name: req.body.first_name,
@@ -211,8 +211,20 @@ exports.users_get = [
 exports.user_get = [
   passport.authenticate("jwt", { session: false }),
   asyncHandler(async (req, res, next) => {
-    const user = await User.findById(req.user.user_id, "-password").exec();
+    console.log(req.params.id);
+    const user = await User.findById(req.params.id, "-password").lean().exec();
 
-    res.status(200).json({ data: user });
+    let data = null;
+
+    if (user._id.toString() === req.user.user_id) {
+      data = {
+        ...user,
+        is_editable: true
+      };
+    } else {
+      data = { ...user };
+    }
+
+    res.status(200).json({ data });
   })
 ]

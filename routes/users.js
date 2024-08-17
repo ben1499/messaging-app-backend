@@ -11,7 +11,7 @@ router.put("/:id", user_controller.user_update);
 
 router.get("/", user_controller.users_get);
 
-router.get("/profile", user_controller.user_get);
+router.get("/:id", user_controller.user_get);
 
 // router.get("/authenticate", passport.authenticate("jwt", { session: false }), (req, res, next) => {
 //   res.status(200).json({ message: "Authenticated", user_id: res.req.user.user_id })
