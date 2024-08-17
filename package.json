@@ -2,13 +2,10 @@
   "name": "messaging-app-backend",
   "version": "0.0.0",
   "private": true,
-  "engines": {
-    "node": ">=16.4.2"
-  },
   "scripts": {
     "start": "node ./bin/www",
     "devstart": "node --watch ./bin/www",
-    "serverstart": "DEBUG=express-local-library:* pnpm run devstart"
+    "serverstart": "DEBUG=messaging-app-backend:* pnpm run devstart"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
